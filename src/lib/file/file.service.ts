@@ -1,17 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import { Global, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { FileType } from '@prisma/client';
-import { ENVEnum } from '@project/common/enum/env.enum'; // adjust if different
+import { ENVEnum } from '@project/common/enum/env.enum';
 import { AppError } from '@project/common/error/handle-error.app';
 import { HandleError } from '@project/common/error/handle-error.decorator';
 import { v2 as cloudinary, UploadApiResponse } from 'cloudinary';
 import * as fs from 'fs';
 import mime from 'mime-types';
-import path from 'path';
+import * as path from 'path';
 import { Readable } from 'stream';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateFileDto } from './dto/create-file.dto';
 
+@Global()
 @Injectable()
 export class FileService {
   constructor(
@@ -31,123 +32,42 @@ export class FileService {
     });
   }
 
-  /* -------------------------
-   | CRUD & Helpers
-   * ------------------------*/
-
+  /* ================== CRUD ================== */
   @HandleError('Error creating file', 'file')
   async create(createFileDto: CreateFileDto) {
-    const file = await this.prisma.fileInstance.create({
-      data: createFileDto,
-    });
-
-    if (!file) {
-      throw new AppError(400, 'Error creating file');
-    }
-
-    return file;
+    return this.prisma.fileInstance.create({ data: createFileDto });
   }
 
   @HandleError('Error finding file', 'file')
   async findOne(id: string) {
-    const file = await this.prisma.fileInstance.findUnique({
-      where: { id },
-    });
-
-    if (!file) {
-      throw new AppError(404, 'File not found');
-    }
-
+    const file = await this.prisma.fileInstance.findUnique({ where: { id } });
+    if (!file) throw new AppError(404, 'File not found');
     return file;
   }
 
-  @HandleError('Error finding file by filename', 'file')
-  async findByFilename(filename: string) {
-    const file = await this.prisma.fileInstance.findFirst({
-      where: { filename },
-    });
-
-    if (!file) {
-      throw new AppError(404, 'File not found');
-    }
-
-    return file;
-  }
-
-  @HandleError('Error listing files', 'file')
-  async findMany(opts?: {
-    skip?: number;
-    take?: number;
-    fileType?: FileType;
-    search?: string;
-  }) {
-    const { skip = 0, take = 20, fileType, search } = opts || {};
-
-    const where: any = {};
-    if (fileType) where.fileType = fileType;
-    if (search) {
-      where.OR = [
-        { filename: { contains: search } },
-        { originalFilename: { contains: search } },
-      ];
-    }
-
-    const [items, total] = await Promise.all([
-      this.prisma.fileInstance.findMany({
-        where,
-        skip,
-        take,
-        orderBy: { createdAt: 'desc' },
-      }),
-      this.prisma.fileInstance.count({ where }),
-    ]);
-
-    return { items, total, skip, take };
+  @HandleError('Error finding files', 'file')
+  async findMany(skip = 0, take = 20) {
+    return this.prisma.fileInstance.findMany({ skip, take });
   }
 
   @HandleError('Error updating file', 'file')
   async update(id: string, data: Partial<CreateFileDto>) {
-    const updated = await this.prisma.fileInstance.update({
-      where: { id },
-      data,
-    });
-
-    if (!updated) throw new AppError(400, 'Error updating file');
-
-    return updated;
+    return this.prisma.fileInstance.update({ where: { id }, data });
   }
 
   @HandleError('Error bulk updating files', 'file')
-  async bulkUpdate(items: Array<{ id: string; data: Partial<CreateFileDto> }>) {
-    // Use transaction to ensure atomic-ish behaviour
-    const ops = items.map((it) =>
-      this.prisma.fileInstance.update({
-        where: { id: it.id },
-        data: it.data,
-      }),
-    );
-
-    return this.prisma.$transaction(ops);
+  async bulkUpdate(ids: string[], data: Partial<CreateFileDto>) {
+    return this.prisma.fileInstance.updateMany({
+      where: { id: { in: ids } },
+      data,
+    });
   }
 
   @HandleError('Error deleting file', 'file')
-  async remove(id: string): Promise<void> {
+  async remove(id: string) {
     const file = await this.findOne(id);
-
-    // delete from Cloudinary if publicId exists
-    if (file.publicId) {
-      try {
-        await cloudinary.uploader.destroy(file.publicId, {
-          resource_type: 'auto',
-        });
-      } catch (err) {
-        // warn but continue to attempt db delete; you may choose to fail instead
-        console.warn('Cloudinary delete failed for', file.publicId, err);
-        throw new AppError(400, 'Error deleting file from Cloudinary');
-      }
-    }
-
-    await this.prisma.fileInstance.delete({ where: { id } });
+    await this.deleteFromCloudinary(file.filename); // filename = Cloudinary public_id
+    return this.prisma.fileInstance.delete({ where: { id } });
   }
 
   @HandleError('Error bulk deleting files', 'file')
@@ -155,113 +75,41 @@ export class FileService {
     const files = await this.prisma.fileInstance.findMany({
       where: { id: { in: ids } },
     });
-
-    // delete from cloudinary in parallel
-    const cloudDeletes = files.map((f) =>
-      f.publicId
-        ? cloudinary.uploader.destroy(f.publicId, { resource_type: 'auto' })
-        : Promise.resolve(null),
-    );
-    await Promise.allSettled(cloudDeletes);
-
-    // delete db records
-    await this.prisma.fileInstance.deleteMany({ where: { id: { in: ids } } });
-
-    return { deleted: ids.length };
+    await Promise.all(files.map((f) => this.deleteFromCloudinary(f.filename)));
+    return this.prisma.fileInstance.deleteMany({ where: { id: { in: ids } } });
   }
 
-  /* -------------------------
-   | Upload helpers (Cloudinary)
-   * ------------------------*/
-
-  /**
-   * Upload a buffer (e.g., file.buffer from multer) to Cloudinary.
-   * Returns UploadApiResponse
-   */
-  @HandleError('Error uploading buffer to Cloudinary', 'file')
-  async uploadBufferToCloudinary(
-    buffer: Buffer,
-    filename: string,
-    folder = 'uploads',
-  ): Promise<UploadApiResponse> {
-    return new Promise((resolve, reject) => {
-      const originalNameWithoutExt = path.parse(filename).name;
-
-      const stream = cloudinary.uploader.upload_stream(
-        {
-          folder,
-          public_id: originalNameWithoutExt + '-' + Date.now(),
-          resource_type: 'auto',
-        },
-        (error, result) => {
-          if (error) return reject(error);
-          resolve(result as UploadApiResponse);
-        },
-      );
-
-      Readable.from(buffer).pipe(stream);
-    });
-  }
-
-  /**
-   * Upload a local file path to Cloudinary (useful if multer stored a temp file)
-   */
-  @HandleError('Error uploading file from path to Cloudinary', 'file')
-  async uploadPathToCloudinary(
-    filePath: string,
-    filename?: string,
-    folder = 'uploads',
-  ): Promise<UploadApiResponse> {
-    return cloudinary.uploader.upload(filePath, {
-      folder,
-      public_id: filename
-        ? path.parse(filename).name + '-' + Date.now()
-        : undefined,
-      resource_type: 'auto',
-    });
-  }
-
-  /**
-   * Process an uploaded file from multer (supports file.buffer or file.path).
-   * - uploads to Cloudinary
-   * - creates Prisma record (stores url and publicId)
-   */
+  /* ================== UPLOAD ================== */
   @HandleError('Error processing uploaded file', 'file')
   async processUploadedFile(file: Express.Multer.File, folder = 'uploads') {
-    const originalName = file.originalname;
-    const mimeType =
-      file.mimetype || mime.lookup(originalName) || 'application/octet-stream';
-    const fileType = this.mapMimeToPrismaFileType(mimeType);
-
     let uploadResult: UploadApiResponse;
 
-    if ((file as any).buffer) {
+    if (file.buffer) {
       uploadResult = await this.uploadBufferToCloudinary(
-        (file as any).buffer,
-        originalName,
+        file.buffer,
+        file.originalname,
         folder,
       );
-    } else if (file.path && fs.existsSync(file.path)) {
+    } else if (file.path) {
       uploadResult = await this.uploadPathToCloudinary(
         file.path,
-        originalName,
+        file.originalname,
         folder,
       );
-      // remove local tmp file if present
-      try {
-        fs.unlinkSync(file.path);
-      } catch (e) {
-        console.warn('Failed to remove local temp file', file.path, e);
-      }
+      fs.unlinkSync(file.path); // remove temp file (if diskStorage was used)
     } else {
-      throw new AppError(400, 'No file buffer or path available for upload');
+      throw new AppError(400, 'Invalid file upload input');
     }
 
-    const createDto: CreateFileDto = {
-      filename:
-        uploadResult.public_id.split('/').slice(-1)[0] +
-        path.extname(originalName),
-      originalFilename: originalName,
+    const mimeType =
+      file.mimetype ||
+      mime.lookup(file.originalname) ||
+      'application/octet-stream';
+    const fileType = this.mapMimeToPrismaFileType(mimeType);
+
+    const createFileDto: CreateFileDto = {
+      filename: uploadResult.public_id, // Cloudinary public_id
+      originalFilename: file.originalname,
       url: uploadResult.secure_url,
       publicId: uploadResult.public_id,
       fileType,
@@ -269,48 +117,79 @@ export class FileService {
       size: file.size ?? Number(uploadResult.bytes ?? 0),
     };
 
-    return this.create(createDto);
+    return this.create(createFileDto);
   }
 
-  /**
-   * If you already have a buffer and metadata and want to both upload and persist
-   */
-  @HandleError('Error uploading buffer & creating file record', 'file')
-  async uploadBufferAndCreate(params: {
-    buffer: Buffer;
-    originalName: string;
-    folder?: string;
-  }) {
-    const { buffer, originalName, folder = 'uploads' } = params;
-    const mimeType = mime.lookup(originalName) || 'application/octet-stream';
-    const fileType = this.mapMimeToPrismaFileType(String(mimeType));
+  async bulkUpload(files: Express.Multer.File[], folder = 'uploads') {
+    return Promise.all(files.map((f) => this.processUploadedFile(f, folder)));
+  }
 
+  async uploadBufferAndCreate(
+    buffer: Buffer,
+    originalName: string,
+    folder = 'uploads',
+  ) {
     const uploadResult = await this.uploadBufferToCloudinary(
       buffer,
       originalName,
       folder,
     );
 
-    const createDto: CreateFileDto = {
-      filename:
-        uploadResult.public_id.split('/').slice(-1)[0] +
-        path.extname(originalName),
+    const mimeType = mime.lookup(originalName) || 'application/octet-stream';
+    const fileType = this.mapMimeToPrismaFileType(mimeType);
+
+    const createFileDto: CreateFileDto = {
+      filename: uploadResult.public_id,
       originalFilename: originalName,
       url: uploadResult.secure_url,
       publicId: uploadResult.public_id,
       fileType,
-      mimeType: String(mimeType),
-      size: Buffer.byteLength(buffer),
+      mimeType,
+      size: Number(uploadResult.bytes ?? 0),
     };
 
-    return this.create(createDto);
+    return this.create(createFileDto);
   }
 
-  /* -------------------------
-   | Utility
-   * ------------------------*/
+  /* ================== HELPERS ================== */
+  private uploadBufferToCloudinary(
+    buffer: Buffer,
+    filename: string,
+    folder: string,
+  ): Promise<UploadApiResponse> {
+    return new Promise((resolve, reject) => {
+      const originalNameWithoutExt = path.parse(filename).name;
+      const stream = cloudinary.uploader.upload_stream(
+        { folder, public_id: originalNameWithoutExt, resource_type: 'auto' },
+        (error, result) => {
+          if (error) return reject(error);
+          resolve(result as UploadApiResponse);
+        },
+      );
+      Readable.from(buffer).pipe(stream);
+    });
+  }
 
-  private mapMimeToPrismaFileType(mimeType?: string | null): FileType {
+  private uploadPathToCloudinary(
+    filePath: string,
+    filename: string,
+    folder: string,
+  ): Promise<UploadApiResponse> {
+    const originalNameWithoutExt = path.parse(filename).name;
+    return cloudinary.uploader.upload(filePath, {
+      folder,
+      public_id: originalNameWithoutExt,
+      resource_type: 'auto',
+    });
+  }
+
+  private async deleteFromCloudinary(publicId: string): Promise<void> {
+    await cloudinary.uploader.destroy(publicId);
+  }
+
+  private mapMimeToPrismaFileType(
+    mimeType: string | null | undefined,
+  ): FileType {
     const top = (mimeType || '').split('/')[0].toLowerCase();
 
     switch (top) {
@@ -323,7 +202,6 @@ export class FileService {
       case 'text':
         return FileType.DOCUMENT;
       case 'application':
-        // treat most application/* as documents (pdf, msword, json, etc.)
         return FileType.DOCUMENT;
       default:
         return FileType.ANY;

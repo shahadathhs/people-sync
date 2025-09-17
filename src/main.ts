@@ -39,12 +39,10 @@ async function bootstrap() {
 
   app.useGlobalFilters(new AllExceptionsFilter());
 
-  app.setGlobalPrefix('api');
-
   // * Swagger config with Bearer Auth
   const config = new DocumentBuilder()
-    .setTitle('Grayson Wescott')
-    .setDescription('Grayson Wescott API description')
+    .setTitle('People Sync')
+    .setDescription('People Sync API description')
     .addBearerAuth()
     .build();
 
