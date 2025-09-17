@@ -105,8 +105,7 @@ export class AuthTfaService {
     if (!user) throw new AppError(404, 'User not found');
 
     switch (method) {
-      case 'EMAIL':
-      case 'PHONE': {
+      case 'EMAIL': {
         if (!user.otp || !user.otpExpiresAt || user.otpExpiresAt < new Date()) {
           throw new AppError(400, 'OTP expired or not found');
         }

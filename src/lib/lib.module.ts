@@ -7,7 +7,6 @@ import { QueueModule } from './queue/queue.module';
 import { SeedModule } from './seed/seed.module';
 import { UtilsModule } from './utils/utils.module';
 import { GatewayModule } from './gateway/gateway.module';
-import { CloudinaryModule } from './cloudinary/cloudinary.module';
 
 @Module({
   imports: [
@@ -18,7 +17,6 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module';
     QueueModule,
     FileModule,
     ChatModule,
-    CloudinaryModule,
     GatewayModule,
   ],
   exports: [],

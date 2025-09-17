@@ -42,12 +42,10 @@ export class AuthLoginService {
 
     // 2. Two-factor authentication
     if (user.isTwoFAEnabled) {
-      if (user.twoFAMethod === 'EMAIL' || user.twoFAMethod === 'PHONE') {
+      if (user.twoFAMethod === 'EMAIL') {
         await this.generateAndSendOtp(email, user.twoFAMethod, 'TFA');
         return successResponse(
-          user.twoFAMethod === 'EMAIL'
-            ? { email: user.email }
-            : { phone: user.phone },
+          { email: user.email },
           `Two-factor authentication is enabled. A new OTP has been sent to your ${user.twoFAMethod.toLowerCase()}.`,
         );
       } else if (user.twoFAMethod === 'AUTH_APP') {

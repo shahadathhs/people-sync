@@ -3,8 +3,8 @@ model FileInstance {
 
   filename         String
   originalFilename String
-  path             String
-  url              String
+  url              String // Cloudinary URL
+  publicId         String // Cloudinary public_id for deletion
   fileType         FileType @default(ANY)
   mimeType         String
   size             Int
@@ -18,11 +18,10 @@ model FileInstance {
 }
 
 enum FileType {
-  IMAGE
-  DOCS
-  LINK
-  DOCUMENT
-  ANY
-  VIDEO
-  AUDIO
+  IMAGE // jpg, png, gif, etc.
+  VIDEO // mp4, mov, etc.
+  AUDIO // mp3, wav, etc.
+  DOCUMENT // pdf, docx, txt, etc.
+  LINK // external URL
+  ANY // fallback for unknown types
 }

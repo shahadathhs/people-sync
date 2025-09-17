@@ -33,7 +33,7 @@ export default defineConfig([
       '@typescript-eslint/no-empty-object-type': 'warn',
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-namespace': 'warn',
-      'no-undef': 'warn',
+      'no-undef': 'off',
     },
   },
   eslintPluginPrettierRecommended,

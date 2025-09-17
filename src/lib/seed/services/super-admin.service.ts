@@ -36,7 +36,6 @@ export class SuperAdminService implements OnModuleInit {
       await this.prisma.user.create({
         data: {
           email: superAdminEmail,
-          signUpMethod: 'MANUAL',
           name: 'Super Admin',
           password: await this.utils.hash(superAdminPass),
           isVerified: true,

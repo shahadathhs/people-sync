@@ -1,17 +1,16 @@
 model User {
   id String @id @default(uuid())
 
-  email String @unique
-
-  phone    String? @unique
+  email    String @unique
   username String? @unique
+
   password String? // hashed password (nullable for social accounts)
 
   name      String? @default("Unnamed User")
   avatarUrl String? @default("https://www.gravatar.com/avatar/000000000000000000000000000000?d=mp&f=y")
 
   role         UserRole     @default(USER)
-  signUpMethod SignUpMethod @default(EMAIL) // * First sign-up method
+  signUpMethod AuthProvider @default(EMAIL) // * First sign-up method
 
   // Logout tracking
   isLoggedIn   Boolean   @default(false)
@@ -30,7 +29,7 @@ model User {
 
   // 2FA
   isTwoFAEnabled Boolean      @default(false)
-  twoFAMethod    TwoFAMethod? // EMAIL, PHONE, AUTH_APP
+  twoFAMethod    TwoFAMethod? // EMAIL, AUTH_APP
   twoFASecret    String? // For authenticator apps (TOTP secret)
 
   // Social auth linked accounts
@@ -75,22 +74,13 @@ enum UserRole {
 }
 
 enum AuthProvider {
-  GOOGLE
-  FACEBOOK
-  TWITTER
-}
-
-enum SignUpMethod {
   EMAIL
-  MANUAL
   GOOGLE
   FACEBOOK
-  TWITTER
 }
 
 enum TwoFAMethod {
   EMAIL
-  PHONE
   AUTH_APP
 }
 

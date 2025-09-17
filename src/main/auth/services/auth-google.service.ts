@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { AuthProvider, SignUpMethod, User } from '@prisma/client';
+import { AuthProvider, User } from '@prisma/client';
 import { UserResponseDto } from '@project/common/dto/user-response.dto';
 import { ENVEnum } from '@project/common/enum/env.enum';
 import { AppError } from '@project/common/error/handle-error.app';
@@ -98,7 +98,7 @@ export class AuthGoogleService {
             avatarUrl:
               payload.picture ||
               'https://www.gravatar.com/avatar/000000000000000000000000000000?d=mp&f=y',
-            signUpMethod: SignUpMethod.GOOGLE,
+            signUpMethod: AuthProvider.GOOGLE,
             authProviders: {
               create: {
                 provider: AuthProvider.GOOGLE,

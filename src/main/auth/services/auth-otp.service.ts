@@ -29,7 +29,7 @@ export class AuthOtpService {
 
     // 1. Find user by email or phone
     const user = await this.prisma.user.findFirst({
-      where: { OR: [{ email }, { phone }] },
+      where: { email },
     });
 
     if (!user) {
@@ -90,7 +90,7 @@ export class AuthOtpService {
 
     // 1. Find user by email or phone
     const user = await this.prisma.user.findFirst({
-      where: { OR: [{ email }, { phone }] },
+      where: { email },
     });
 
     if (!user) throw new AppError(400, 'User not found');
