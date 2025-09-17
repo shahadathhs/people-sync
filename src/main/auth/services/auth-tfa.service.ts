@@ -7,7 +7,6 @@ import {
 } from '@project/common/utils/response.util';
 import { MailService } from '@project/lib/mail/mail.service';
 import { PrismaService } from '@project/lib/prisma/prisma.service';
-import { TwilioService } from '@project/lib/twilio/twilio.service';
 import { UtilsService } from '@project/lib/utils/utils.service';
 import * as OTPAuth from 'otpauth';
 import qrcode from 'qrcode';
@@ -19,7 +18,6 @@ export class AuthTfaService {
     private readonly prisma: PrismaService,
     private readonly utils: UtilsService,
     private readonly mailService: MailService,
-    private readonly twilio: TwilioService,
   ) {}
 
   /** Request to enable 2FA */
@@ -35,15 +33,7 @@ export class AuthTfaService {
       throw new AppError(400, 'User must be verified to enable 2FA');
 
     switch (method) {
-      case 'EMAIL':
-      case 'PHONE': {
-        if (method === 'PHONE' && !user.phone) {
-          throw new AppError(
-            400,
-            'User must have a phone number to enable 2FA',
-          );
-        }
-
+      case 'EMAIL': {
         const { otp, expiryTime } = this.utils.generateOtpAndExpiry();
         const hashedOtp = await this.utils.hash(otp.toString());
 
@@ -57,18 +47,14 @@ export class AuthTfaService {
           },
         });
 
-        if (method === 'EMAIL') {
-          await this.mailService.sendVerificationCodeEmail(
-            user.email,
-            otp.toString(),
-            {
-              subject: 'Enable 2FA - OTP',
-              message: 'Use this OTP to enable Two-Factor Authentication.',
-            },
-          );
-        } else {
-          await this.twilio.sendTFACode(user.phone!, otp.toString());
-        }
+        await this.mailService.sendVerificationCodeEmail(
+          user.email,
+          otp.toString(),
+          {
+            subject: 'Enable 2FA - OTP',
+            message: 'Use this OTP to enable Two-Factor Authentication.',
+          },
+        );
 
         return successResponse(
           null,

@@ -8,7 +8,6 @@ import {
 } from '@project/common/utils/response.util';
 import { MailService } from '@project/lib/mail/mail.service';
 import { PrismaService } from '@project/lib/prisma/prisma.service';
-import { TwilioService } from '@project/lib/twilio/twilio.service';
 import { UtilsService } from '@project/lib/utils/utils.service';
 import { LoginDto } from '../dto/login.dto';
 
@@ -17,7 +16,6 @@ export class AuthLoginService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly mailService: MailService,
-    private readonly twilio: TwilioService,
     private readonly utils: UtilsService,
   ) {}
 
@@ -90,19 +88,15 @@ export class AuthLoginService {
     const { otp, expiryTime } = this.utils.generateOtpAndExpiry();
     const hashedOtp = await this.utils.hash(otp.toString());
 
-    const user = await this.prisma.user.update({
+    await this.prisma.user.update({
       where: { email },
       data: { otp: hashedOtp, otpExpiresAt: expiryTime, otpType: type },
     });
 
-    if (method === 'EMAIL') {
-      await this.mailService.sendVerificationCodeEmail(email, otp.toString(), {
-        subject: 'Verify your login',
-        message: 'Please verify your email to complete the login process.',
-      });
-    } else if (method === 'PHONE') {
-      await this.twilio.sendTFACode(user.phone || '', otp.toString());
-    }
+    await this.mailService.sendVerificationCodeEmail(email, otp.toString(), {
+      subject: 'Verify your login',
+      message: 'Please verify your email to complete the login process.',
+    });
 
     return otp;
   }

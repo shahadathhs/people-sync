@@ -1,5 +1,5 @@
 # Docker image name
-APP_IMAGE := sajibsv/grayson-server:latest
+APP_IMAGE := shahadathhs/peoplesync-server:latest
 
 # Compose file
 COMPOSE_FILE := compose.yaml

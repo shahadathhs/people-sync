@@ -8,7 +8,6 @@ import {
 } from '@project/common/utils/response.util';
 import { MailService } from '@project/lib/mail/mail.service';
 import { PrismaService } from '@project/lib/prisma/prisma.service';
-import { TwilioService } from '@project/lib/twilio/twilio.service';
 import { UtilsService } from '@project/lib/utils/utils.service';
 import { VerifyOTPDto } from '../dto/otp.dto';
 import { AuthTfaService } from './auth-tfa.service';
@@ -19,7 +18,6 @@ export class AuthOtpService {
     private readonly prisma: PrismaService,
     private readonly utils: UtilsService,
     private readonly mailService: MailService,
-    private readonly twilio: TwilioService,
     private readonly authTfaService: AuthTfaService,
   ) {}
 
@@ -77,8 +75,6 @@ export class AuthOtpService {
           'Failed to send OTP email. Please try again later.',
         );
       }
-    } else if (phone) {
-      await this.twilio.sendTFACode(phone, otp.toString());
     }
 
     return successResponse(null, 'OTP resent successfully');

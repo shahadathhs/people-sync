@@ -2,38 +2,13 @@ services:
   server:
     image: shahadathhs/peoplesync-server:latest
     platform: linux/amd64
-    container_name: peoplesync-server-api
+    container_name: peoplesync_api
     restart: always
     build:
       context: .
       dockerfile: Dockerfile
-    environment:
-      BASE_URL: https://lgcglobalcontractingltd.com/js
-
-      PORT: 5010
-      NODE_ENV: production
-
-      DATABASE_URL: postgresql://postgres:postgres@db:5432/peoplesync_db
-
-      JWT_SECRET: asdfkamskfmasklfmaksmfaskfmaksfaopsfmpaomsfpaf
-      JWT_EXPIRES_IN: 90d
-
-      MAIL_USER: arafatmannan2019@gmail.com
-      MAIL_PASS: eurp zvyi gnoy enag
-
-      SUPER_ADMIN_EMAIL: 'peoplesync@gmail.com'
-      SUPER_ADMIN_PASS: 'superadmin'
-
-      REDIS_URL: redis://redis:6379
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-
-      OAUTH_CLIENT_ID: '1074646902032-5ab3gkkggb7mrejjfnvr7ra65qos4o8s.apps.googleusercontent.com'
-      OAUTH_CLIENT_SECRET: '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'
-
-      FRONTEND_VERIFICATION_URL: 'https://peoplesync.vercel.app/twostepverification'
-      FRONTEND_RESET_PASSWORD_URL: 'https://peoplesync.vercel.app/resetpassword'
-      FRONTEND_SOCIAL_EMAIL_URL: 'https://peoplesync.vercel.app/socialemail'
+    env_file:
+      - .env
     ports:
       - 5010:5010
     depends_on:
@@ -55,7 +30,6 @@ services:
       POSTGRES_DB: peoplesync_db
     volumes:
       - peoplesync_db:/var/lib/postgresql/data
-      - files:/app/api/files
     ports:
       - '5404:5432'
 
@@ -68,4 +42,3 @@ services:
 
 volumes:
   peoplesync_db:
-  files:
