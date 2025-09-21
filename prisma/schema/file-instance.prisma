@@ -1,19 +1,21 @@
 model FileInstance {
   id String @id @default(uuid())
 
-  filename         String
-  originalFilename String
-  url              String // Cloudinary URL
-  publicId         String // Cloudinary public_id for deletion
-  fileType         FileType @default(ANY)
-  mimeType         String
-  size             Int
-
-  privateMessage PrivateMessage[]
+  filename  String // Actual stored filename in Supabase
+  bucket    Bucket // Supabase bucket name
+  path      String   @unique // Path inside the bucket (unique identifier)
+  mimeType  String // MIME type (image/png, application/pdf, etc.)
+  size      Int // File size in bytes
+  publicUrl String
+  fileType  FileType @default(IMAGE)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
+  // Relations
+  privateMessage PrivateMessage[]
+
+  @@unique([bucket, path])
   @@map("file_instances")
 }
 
@@ -24,4 +26,9 @@ enum FileType {
   DOCUMENT // pdf, docx, txt, etc.
   LINK // external URL
   ANY // fallback for unknown types
+}
+
+enum Bucket {
+  product
+  profile
 }

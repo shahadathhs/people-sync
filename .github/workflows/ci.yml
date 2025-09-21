@@ -1,11 +1,13 @@
 name: CI Check Pipeline
 
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches:
-      - "**"
+# on:
+#   push:
+#     branches: [main]
+#   pull_request:
+#     branches:
+#       - "**"
+
+on: workflow_dispatch  # only runs manually if triggered
 
 jobs:
   ci-check:

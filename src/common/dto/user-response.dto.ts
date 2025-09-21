@@ -10,10 +10,13 @@ export class UserResponseDto {
   email: string;
 
   @Expose()
-  phone?: string;
+  username: string;
 
   @Expose()
-  username?: string;
+  employeeId: number;
+
+  @Expose()
+  role: UserRole;
 
   @Expose()
   name?: string;
@@ -22,22 +25,22 @@ export class UserResponseDto {
   avatarUrl?: string;
 
   @Expose()
-  role: UserRole;
-
-  @Expose()
-  signUpMethod: string;
-
-  @Expose()
-  isVerified: boolean;
-
-  @Expose()
   isLoggedIn: boolean;
 
   @Expose()
-  isTwoFAEnabled: boolean;
+  lastLoginAt?: Date;
 
   @Expose()
-  twoFAMethod?: string;
+  lastLogoutAt?: Date;
+
+  @Expose()
+  isActive: boolean;
+
+  @Expose()
+  isBanned: boolean;
+
+  @Expose()
+  isUsernameUpdated: boolean;
 
   @Expose()
   createdAt: Date;

@@ -1,39 +1,24 @@
 model User {
   id String @id @default(uuid())
 
-  email    String @unique
-  username String? @unique
-
-  password String? // hashed password (nullable for social accounts)
+  email      String   @unique
+  username   String   @unique // auto-generated, updatable once
+  employeeId BigInt   @unique @default(autoincrement()) // auto-increment employee number
+  password   String // hashed password 
+  role       UserRole @default(EMPLOYEE)
 
   name      String? @default("Unnamed User")
   avatarUrl String? @default("https://www.gravatar.com/avatar/000000000000000000000000000000?d=mp&f=y")
-
-  role         UserRole     @default(USER)
-  signUpMethod AuthProvider @default(EMAIL) // * First sign-up method
 
   // Logout tracking
   isLoggedIn   Boolean   @default(false)
   lastLoginAt  DateTime?
   lastLogoutAt DateTime?
 
-  // OTP / Verification OR TFA
-  otp          String? // hashed OTP
-  otpType      OtpType?
-  otpExpiresAt DateTime?
-  isVerified   Boolean   @default(false)
-
-  // Reset password
-  resetToken          String? // hashed reset token
-  resetTokenExpiresAt DateTime?
-
-  // 2FA
-  isTwoFAEnabled Boolean      @default(false)
-  twoFAMethod    TwoFAMethod? // EMAIL, AUTH_APP
-  twoFASecret    String? // For authenticator apps (TOTP secret)
-
-  // Social auth linked accounts
-  authProviders UserAuthProvider[]
+  // Account Status
+  isActive          Boolean @default(true)
+  isBanned          Boolean @default(false)
+  isUsernameUpdated Boolean @default(false)
 
   // Chats
   privateMessage                 PrivateMessage[]
@@ -45,46 +30,20 @@ model User {
   // Notifications
   notifications UserNotification[]
 
+  // Refresh Tokens
+  refreshTokens RefreshToken[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
+  @@index([role])
+  @@index([isActive, isBanned])
   @@map("users")
-}
-
-model UserAuthProvider {
-  id String @id @default(uuid())
-
-  provider   AuthProvider
-  providerId String
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-
-  @@unique([provider, providerId])
-  @@map("user_auth_providers")
 }
 
 enum UserRole {
   SUPER_ADMIN
   ADMIN
-  USER
-}
-
-enum AuthProvider {
-  EMAIL
-  GOOGLE
-  FACEBOOK
-}
-
-enum TwoFAMethod {
-  EMAIL
-  AUTH_APP
-}
-
-enum OtpType {
-  VERIFICATION
-  TFA
+  EMPLOYEE
+  OWNER
 }

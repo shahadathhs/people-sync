@@ -29,5 +29,13 @@
   // 🔧 Prettier Config Sync
   "prettier.useEditorConfig": true,
   "prettier.resolveGlobalModules": false,
-  "cSpell.words": ["peoplesync", "qrcode", "shahadathhs", "TOTP", "WEBRTC"]
+  "cSpell.words": [
+    "autoincrement",
+    "peoplesync",
+    "qrcode",
+    "shahadathhs",
+    "Supabase",
+    "TOTP",
+    "WEBRTC"
+  ]
 }
