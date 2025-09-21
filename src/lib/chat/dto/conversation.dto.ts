@@ -1,5 +1,5 @@
+import { PaginationDto } from '@/common/dto/pagination.dto';
 import { ApiProperty } from '@nestjs/swagger';
-import { PaginationDto } from '@project/common/dto/pagination.dto';
 import { IsNotEmpty, IsString } from 'class-validator';
 
 // ----------------------

@@ -1,3 +1,4 @@
+import { PaginationDto } from '@/common/dto/pagination.dto';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
@@ -11,7 +12,6 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { PaginationDto } from '@project/common/dto/pagination.dto';
 import { Server, Socket } from 'socket.io';
 import { AppGateway } from '../gateway/app.gateway';
 import { PrismaService } from '../prisma/prisma.service';

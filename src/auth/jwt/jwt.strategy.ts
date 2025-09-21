@@ -1,9 +1,13 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { ENVEnum } from '@/common/enum/env.enum';
+import { PrismaService } from '@/lib/prisma/prisma.service';
+import {
+  ForbiddenException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
-import { PrismaService } from '@project/lib/prisma/prisma.service';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { ENVEnum } from '../enum/env.enum';
 import { JWTPayload } from './jwt.interface';
 
 @Injectable()
@@ -28,13 +32,15 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
 
     if (!user) {
-      throw new ForbiddenException('User not found');
+      // unauthorized because token refers to no user
+      throw new UnauthorizedException('User not found');
     }
 
     if (!user.isLoggedIn) {
       throw new ForbiddenException('User is not logged in');
     }
 
+    // return payload — this will be assigned to req.user
     return payload;
   }
 }

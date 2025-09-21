@@ -1,10 +1,10 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
-import { HandleError } from '@project/common/error/handle-error.decorator';
+import { HandleError } from '@/common/error/handle-error.decorator';
 import {
   successPaginatedResponse,
   TPaginatedResponse,
-} from '@project/common/utils/response.util';
-import { PrismaService } from '@project/lib/prisma/prisma.service';
+} from '@/common/utils/response.util';
+import { PrismaService } from '@/lib/prisma/prisma.service';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { Socket } from 'socket.io';
 import { ChatGateway } from '../chat.gateway';
 import { LoadConversationsDto } from '../dto/conversation.dto';
@@ -33,7 +33,13 @@ export class ConversationService {
         lastMessage: true,
         participants: {
           where: { type: 'USER' },
-          include: { user: true },
+          include: {
+            user: {
+              include: {
+                avatar: true,
+              },
+            },
+          },
         },
       },
       orderBy: { updatedAt: 'desc' },
@@ -49,7 +55,7 @@ export class ConversationService {
         profile: {
           id: conversation.participants[0].user?.id,
           name: conversation.participants[0].user?.name,
-          avatarUrl: conversation.participants[0].user?.avatarUrl,
+          avatarUrl: conversation.participants[0].user?.avatar?.publicUrl,
           role: conversation.participants[0].user?.role,
           email: conversation.participants[0].user?.email,
         },

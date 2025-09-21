@@ -1,16 +1,13 @@
+import { ENVEnum } from '@/common/enum/env.enum';
+import { errorResponse, successResponse } from '@/common/utils/response.util';
+import { Notification } from '@/lib/queue/interface/events-payload';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { ENVEnum } from '@project/common/enum/env.enum';
-import { Notification } from '@project/common/interface/events-payload';
-import { JWTPayload } from '@project/common/jwt/jwt.interface';
-import {
-  errorResponse,
-  successResponse,
-} from '@project/common/utils/response.util';
 import { Server, Socket } from 'socket.io';
 import { ChatEventsEnum } from '../chat/enum/chat-events.enum';
 import { PrismaService } from '../prisma/prisma.service';
+import { JWTPayload } from '@/auth/jwt/jwt.interface';
 
 @Injectable()
 export class AppGateway {
@@ -50,7 +47,7 @@ export class AppGateway {
           email: true,
           role: true,
           name: true,
-          avatarUrl: true,
+          avatar: true,
         },
       });
 

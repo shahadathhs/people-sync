@@ -1,8 +1,8 @@
+import { HandleError } from '@/common/error/handle-error.decorator';
+import { errorResponse, TResponse } from '@/common/utils/response.util';
+import { PrismaService } from '@/lib/prisma/prisma.service';
 import { Injectable } from '@nestjs/common';
 import { ConversationParticipantType, MessageType } from '@prisma/client';
-import { HandleError } from '@project/common/error/handle-error.decorator';
-import { errorResponse, TResponse } from '@project/common/utils/response.util';
-import { PrismaService } from '@project/lib/prisma/prisma.service';
 import { Socket } from 'socket.io';
 import {
   InitConversationWithClientDto,
@@ -34,10 +34,15 @@ export class SingleConversationService {
     const conversation = await this.prisma.privateConversation.findUnique({
       where: { id: payload.conversationId },
       include: {
-        participants: { include: { user: true } },
+        participants: { include: { user: { include: { avatar: true } } } },
         messages: {
           orderBy: { createdAt: 'desc' },
-          include: { sender: true, file: true },
+          include: {
+            sender: {
+              include: { avatar: true },
+            },
+            file: true,
+          },
         },
         calls: {
           orderBy: { startedAt: 'desc' },
@@ -58,7 +63,7 @@ export class SingleConversationService {
     const participants = conversation.participants.map((p) => ({
       id: p.user?.id,
       name: p.user?.name,
-      avatarUrl: p.user?.avatarUrl,
+      avatarUrl: p.user?.avatar?.publicUrl,
       role: p.user?.role,
       email: p.user?.email,
     }));
@@ -73,14 +78,14 @@ export class SingleConversationService {
       sender: {
         id: m.sender?.id,
         name: m.sender?.name,
-        avatarUrl: m.sender?.avatarUrl,
+        avatarUrl: m.sender?.avatar?.publicUrl,
         role: m.sender?.role,
         email: m.sender?.email,
       },
       file: m.file
         ? {
             id: m.file.id,
-            url: m.file.url,
+            url: m.file.publicUrl,
             type: m.file.fileType,
             mimeType: m.file.mimeType,
           }

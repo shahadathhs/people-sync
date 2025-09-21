@@ -6,10 +6,8 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { ScheduleModule } from '@nestjs/schedule';
-import { ServeStaticModule } from '@nestjs/serve-static';
-import { join } from 'path';
+import { AuthModule } from './auth/auth.module';
 import { ENVEnum } from './common/enum/env.enum';
-import { JwtStrategy } from './common/jwt/jwt.strategy';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import { LibModule } from './lib/lib.module';
 import { MainModule } from './main/main.module';
@@ -22,11 +20,6 @@ import { MainModule } from './main/main.module';
 
     CacheModule.register({
       isGlobal: true,
-    }),
-
-    ServeStaticModule.forRoot({
-      rootPath: join(process.cwd(), 'uploads'),
-      serveRoot: '/api/files',
     }),
 
     EventEmitterModule.forRoot({
@@ -51,7 +44,7 @@ import { MainModule } from './main/main.module';
       },
     }),
 
-    PassportModule,
+    PassportModule.register({ defaultStrategy: 'jwt' }),
 
     JwtModule.registerAsync({
       global: true,
@@ -65,12 +58,12 @@ import { MainModule } from './main/main.module';
       }),
     }),
 
+    AuthModule,
+
     MainModule,
 
     LibModule,
   ],
-  providers: [JwtStrategy],
-  exports: [JwtStrategy],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

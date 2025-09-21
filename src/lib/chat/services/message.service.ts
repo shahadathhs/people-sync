@@ -1,16 +1,16 @@
+import { HandleError } from '@/common/error/handle-error.decorator';
+import {
+  errorResponse,
+  successResponse,
+  TResponse,
+} from '@/common/utils/response.util';
+import { PrismaService } from '@/lib/prisma/prisma.service';
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import {
   ConversationParticipantType,
   MessageDeliveryStatus,
   MessageType,
 } from '@prisma/client';
-import { HandleError } from '@project/common/error/handle-error.decorator';
-import {
-  errorResponse,
-  successResponse,
-  TResponse,
-} from '@project/common/utils/response.util';
-import { PrismaService } from '@project/lib/prisma/prisma.service';
 import { Socket } from 'socket.io';
 import { ChatGateway } from '../chat.gateway';
 import {

@@ -1,11 +1,8 @@
+import { HandleError } from '@/common/error/handle-error.decorator';
+import { successResponse, TResponse } from '@/common/utils/response.util';
+import { PrismaService } from '@/lib/prisma/prisma.service';
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { CallParticipantStatus, CallStatus } from '@prisma/client';
-import { HandleError } from '@project/common/error/handle-error.decorator';
-import {
-  successResponse,
-  TResponse,
-} from '@project/common/utils/response.util';
-import { PrismaService } from '@project/lib/prisma/prisma.service';
 import { Socket } from 'socket.io';
 import { ChatGateway } from '../chat.gateway';
 import { InitiateCallDto } from '../dto/call.dto';

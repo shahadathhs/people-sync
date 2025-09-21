@@ -1,10 +1,10 @@
+import { ENVEnum } from '@/common/enum/env.enum';
+import { AppGateway } from '@/lib/gateway/app.gateway';
+import { PrismaService } from '@/lib/prisma/prisma.service';
+import { RecognitionEvent } from '@/lib/queue/interface/events-payload';
+import { QueueName } from '@/lib/queue/interface/queue-name';
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { ENVEnum } from '@project/common/enum/env.enum';
-import { RecognitionEvent } from '@project/common/interface/events-payload';
-import { QueueName } from '@project/common/interface/queue-name';
-import { AppGateway } from '@project/lib/gateway/app.gateway';
-import { PrismaService } from '@project/lib/prisma/prisma.service';
 import { Worker } from 'bullmq';
 
 @Injectable()

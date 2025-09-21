@@ -1,11 +1,11 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
-import { PaginationDto } from '@project/common/dto/pagination.dto';
-import { HandleError } from '@project/common/error/handle-error.decorator';
+import { PaginationDto } from '@/common/dto/pagination.dto';
+import { HandleError } from '@/common/error/handle-error.decorator';
 import {
   successPaginatedResponse,
   TResponse,
-} from '@project/common/utils/response.util';
-import { PrismaService } from '@project/lib/prisma/prisma.service';
+} from '@/common/utils/response.util';
+import { PrismaService } from '@/lib/prisma/prisma.service';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { Socket } from 'socket.io';
 import { ChatGateway } from '../chat.gateway';
 import { ChatEventsEnum } from '../enum/chat-events.enum';
@@ -31,9 +31,24 @@ export class ClientConversationService {
     const conversation = await this.prisma.privateConversation.findFirst({
       where: { participants: { some: { userId } } },
       include: {
-        participants: { include: { user: true } },
+        participants: {
+          include: {
+            user: {
+              include: {
+                avatar: true,
+              },
+            },
+          },
+        },
         messages: {
-          include: { sender: true, file: true },
+          include: {
+            sender: {
+              include: {
+                avatar: true,
+              },
+            },
+            file: true,
+          },
           orderBy: { createdAt: 'desc' },
         },
         calls: {
@@ -70,14 +85,14 @@ export class ClientConversationService {
       sender: {
         id: m.sender?.id,
         name: m.sender?.name,
-        avatarUrl: m.sender?.avatarUrl,
+        avatarUrl: m.sender?.avatar?.publicUrl,
         role: m.sender?.role,
         email: m.sender?.email,
       },
       file: m.file
         ? {
             id: m.file.id,
-            url: m.file.url,
+            url: m.file.publicUrl,
             type: m.file.fileType,
             mimeType: m.file.mimeType,
           }

@@ -5,32 +5,17 @@ import { IsEnum, IsNumber, IsString } from 'class-validator';
 export class CreateFileDto {
   @ApiProperty({
     example: 'file_12345.png',
-    description: 'Generated filename stored in DB',
+    description: 'Filename stored in Supabase',
   })
   @IsString()
   filename: string;
 
   @ApiProperty({
-    example: 'my_photo.png',
-    description: 'Original filename uploaded by user',
+    example: 'user123/file_12345.png',
+    description: 'Path inside the bucket',
   })
   @IsString()
-  originalFilename: string;
-
-  @ApiProperty({
-    example:
-      'https://res.cloudinary.com/demo/image/upload/v1691234567/file_12345.png',
-    description: 'Public Cloudinary URL',
-  })
-  @IsString()
-  url: string;
-
-  @ApiProperty({
-    example: 'file_12345',
-    description: 'Cloudinary public_id for delete operations',
-  })
-  @IsString()
-  publicId: string;
+  path: string;
 
   @ApiProperty({
     enum: FileType,
