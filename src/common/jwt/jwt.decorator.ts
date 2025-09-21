@@ -7,17 +7,17 @@ import {
 } from '@nestjs/common';
 import { UserEnum } from '../enum/user.enum';
 import { JwtAuthGuard, RolesGuard } from './jwt.guard';
-import { RequestWithUser } from './jwt.interface';
+import { JWTPayload, UserRequest } from './jwt.interface';
 
-export const ROLES_KEY = 'roles';
+export const ROLES_KEY = 'role';
 export const Roles = (...roles: UserEnum[]) => SetMetadata(ROLES_KEY, roles);
 
 export const GetUser = createParamDecorator(
-  (key: string | undefined, ctx: ExecutionContext) => {
-    const request = ctx.switchToHttp().getRequest<RequestWithUser>();
+  (key: JWTPayload['sub'], ctx: ExecutionContext) => {
+    const request = ctx.switchToHttp().getRequest<UserRequest>();
     const user = request.user;
 
-    return key ? user?.[key] : user;
+    return key ? user?.sub : user;
   },
 );
 
@@ -29,10 +29,14 @@ export function ValidateAuth(...roles: UserEnum[]) {
   return applyDecorators(...decorators);
 }
 
+export function ValidateOwner() {
+  return ValidateAuth(UserEnum.OWNER);
+}
+
 export function ValidateSuperAdmin() {
-  return ValidateAuth(UserEnum.SUPER_ADMIN);
+  return ValidateAuth(UserEnum.SUPER_ADMIN, UserEnum.OWNER);
 }
 
 export function ValidateAdmin() {
-  return ValidateAuth(UserEnum.ADMIN, UserEnum.SUPER_ADMIN);
+  return ValidateAuth(UserEnum.ADMIN, UserEnum.SUPER_ADMIN, UserEnum.OWNER);
 }

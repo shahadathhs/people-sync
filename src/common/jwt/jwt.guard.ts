@@ -8,7 +8,7 @@ import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 import { UserEnum } from '../enum/user.enum';
 import { ROLES_KEY } from './jwt.decorator';
-import { RequestWithUser } from './jwt.interface';
+import { UserRequest } from './jwt.interface';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {}
@@ -25,14 +25,14 @@ export class RolesGuard implements CanActivate {
 
     if (!requiredRoles) return true;
 
-    const request = context.switchToHttp().getRequest<RequestWithUser>();
+    const request = context.switchToHttp().getRequest<UserRequest>();
     const user = request.user;
 
-    if (!user?.roles) {
+    if (!user?.role) {
       throw new ForbiddenException('User roles not found');
     }
 
-    const hasRole = requiredRoles.some((role) => user.roles!.includes(role));
+    const hasRole = requiredRoles.some((role) => user.role!.includes(role));
 
     if (!hasRole) {
       throw new ForbiddenException('Insufficient role');

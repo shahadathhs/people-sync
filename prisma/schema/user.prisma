@@ -1,21 +1,30 @@
 model User {
   id String @id @default(uuid())
 
-  email      String   @unique
+  name     String? @default("Unnamed User")
+  email    String  @unique
+  password String // hashed password 
+
   username   String   @unique // auto-generated, updatable once
   employeeId BigInt   @unique @default(autoincrement()) // auto-increment employee number
-  password   String // hashed password 
   role       UserRole @default(EMPLOYEE)
 
-  name      String? @default("Unnamed User")
-  avatarUrl String? @default("https://www.gravatar.com/avatar/000000000000000000000000000000?d=mp&f=y")
+  avatarId String?
+  avatar   FileInstance? @relation(fields: [avatarId], references: [id], onDelete: SetNull)
+
+  // HR relations
+  department   Department? @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  departmentId String?
+
+  jobTitle   JobTitle? @relation(fields: [jobTitleId], references: [id], onDelete: SetNull)
+  jobTitleId String?
 
   // Logout tracking
   isLoggedIn   Boolean   @default(false)
   lastLoginAt  DateTime?
   lastLogoutAt DateTime?
 
-  // Account Status
+  // Account status
   isActive          Boolean @default(true)
   isBanned          Boolean @default(false)
   isUsernameUpdated Boolean @default(false)
@@ -42,8 +51,8 @@ model User {
 }
 
 enum UserRole {
-  SUPER_ADMIN
+  OWNER // created once on sign up, cannot be deleted/demoted
+  SUPER_ADMIN // delegated by owner
   ADMIN
   EMPLOYEE
-  OWNER
 }
