@@ -6,7 +6,6 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { ScheduleModule } from '@nestjs/schedule';
-import { AuthModule } from './auth/auth.module';
 import { ENVEnum } from './common/enum/env.enum';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import { LibModule } from './lib/lib.module';
@@ -57,8 +56,6 @@ import { MainModule } from './main/main.module';
         },
       }),
     }),
-
-    AuthModule,
 
     MainModule,
 

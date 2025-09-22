@@ -2,13 +2,13 @@ import { CreateFileDto } from '@/common/dto/create-file.dto';
 import { ENVEnum } from '@/common/enum/env.enum';
 import { AppError } from '@/common/error/handle-error.app';
 import { HandleError } from '@/common/error/handle-error.decorator';
+import { PrismaService } from '@/lib/prisma/prisma.service';
 import { Global, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Bucket, FileType } from '@prisma/client';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { randomUUID } from 'crypto';
 import mime from 'mime-types';
-import { PrismaService } from '../prisma/prisma.service';
 
 @Global()
 @Injectable()

@@ -13,8 +13,8 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { AppGateway } from '../gateway/app.gateway';
-import { PrismaService } from '../prisma/prisma.service';
+import { AppGateway } from '../../lib/gateway/app.gateway';
+import { PrismaService } from '../../lib/prisma/prisma.service';
 import { CallActionDto, InitiateCallDto } from './dto/call.dto';
 import {
   InitConversationWithClientDto,
