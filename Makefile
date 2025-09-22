@@ -34,11 +34,11 @@ restart: down up
 
 # Show logs of the app
 logs:
-	docker compose -f $(COMPOSE_FILE) logs -f book_store_app
+	docker compose -f $(COMPOSE_FILE) logs -f peoplesync_api
 
 # Cleanup everything
 clean: down
-	docker volume rm book_store_data || true
+	docker volume rm peoplesync_db || true
 	docker rmi $(APP_IMAGE) || true
 
 # Push to Docker Hub
