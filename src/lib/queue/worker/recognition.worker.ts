@@ -16,6 +16,23 @@ export class RecognitionWorker implements OnModuleInit {
   ) {}
 
   onModuleInit() {
+    const host = this.config.getOrThrow<string>(ENVEnum.REDIS_HOST);
+    const port = +this.config.getOrThrow<string>(ENVEnum.REDIS_PORT);
+    const username = this.config.get<string>(ENVEnum.REDIS_USERNAME, {
+      infer: true,
+    });
+    const password = this.config.get<string>(ENVEnum.REDIS_PASSWORD, {
+      infer: true,
+    });
+
+    const connection: any = { host, port };
+
+    if (username && password) {
+      connection.username = username;
+      connection.password = password;
+      connection.tls = { rejectUnauthorized: false };
+    }
+
     new Worker<RecognitionEvent>(
       QueueName.RECOGNITION,
       async (job) => {
@@ -34,11 +51,7 @@ export class RecognitionWorker implements OnModuleInit {
               type: 'Recognition',
               title,
               message: 'Test Message',
-              meta: {
-                recognitionId,
-                performedBy,
-                createdAt,
-              },
+              meta: { recognitionId, performedBy, createdAt },
               users: {
                 createMany: {
                   data: recipients.map((recipient) => ({
@@ -55,17 +68,7 @@ export class RecognitionWorker implements OnModuleInit {
           );
         }
       },
-      {
-        connection: {
-          host: this.config.getOrThrow<string>(ENVEnum.REDIS_HOST),
-          port: +this.config.getOrThrow<string>(ENVEnum.REDIS_PORT),
-          username: this.config.getOrThrow<string>(ENVEnum.REDIS_USERNAME),
-          password: this.config.getOrThrow<string>(ENVEnum.REDIS_PASSWORD),
-          tls: {
-            rejectUnauthorized: false,
-          },
-        },
-      },
+      { connection },
     );
   }
 }

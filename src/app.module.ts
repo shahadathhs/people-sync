@@ -33,16 +33,28 @@ import { MainModule } from './main/main.module';
     BullModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: async (config: ConfigService) => {
+      useFactory: async (configService: ConfigService) => {
+        const host = configService.getOrThrow<string>(ENVEnum.REDIS_HOST);
+        const port = configService.getOrThrow<string>(ENVEnum.REDIS_PORT);
+        const username = configService.get<string>(ENVEnum.REDIS_USERNAME, {
+          infer: true,
+        });
+        const password = configService.get<string>(ENVEnum.REDIS_PASSWORD, {
+          infer: true,
+        });
+
         return {
           connection: {
-            host: config.getOrThrow<string>(ENVEnum.REDIS_HOST),
-            port: +config.getOrThrow<string>(ENVEnum.REDIS_PORT),
-            username: config.getOrThrow<string>(ENVEnum.REDIS_USERNAME),
-            password: config.getOrThrow<string>(ENVEnum.REDIS_PASSWORD),
-            tls: {
-              rejectUnauthorized: false,
-            },
+            host,
+            port: parseInt(port, 10),
+            ...(username &&
+              password && {
+                username,
+                password,
+                tls: {
+                  rejectUnauthorized: false,
+                },
+              }),
           },
         };
       },
