@@ -2,11 +2,13 @@ import { BullModule } from '@nestjs/bullmq';
 import { CacheModule } from '@nestjs/cache-manager';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { Reflector } from '@nestjs/core';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ENVEnum } from './common/enum/env.enum';
+import { JwtStrategy } from './common/jwt/jwt.strategy';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import { LibModule } from './lib/lib.module';
 import { MainModule } from './main/main.module';
@@ -61,6 +63,8 @@ import { MainModule } from './main/main.module';
 
     LibModule,
   ],
+  providers: [JwtStrategy, Reflector],
+  exports: [JwtStrategy, PassportModule],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

@@ -1,5 +1,4 @@
 import { ENVEnum } from '@/common/enum/env.enum';
-import { AppGateway } from '@/lib/gateway/app.gateway';
 import { PrismaService } from '@/lib/prisma/prisma.service';
 import { RecognitionEvent } from '@/lib/queue/interface/events-payload';
 import { QueueName } from '@/lib/queue/interface/queue-name';
@@ -12,7 +11,6 @@ export class RecognitionWorker implements OnModuleInit {
   private logger = new Logger(RecognitionWorker.name);
 
   constructor(
-    private readonly gateway: AppGateway,
     private readonly config: ConfigService,
     private readonly prisma: PrismaService,
   ) {}
@@ -29,17 +27,6 @@ export class RecognitionWorker implements OnModuleInit {
 
         try {
           // * Send Socket Notification
-          this.gateway.notifyMultipleUsers(
-            recipients.map((recipient) => recipient.id),
-            action,
-            {
-              type: action,
-              title,
-              createdAt,
-              message: 'Test Message',
-              meta: { recognitionId },
-            },
-          );
 
           // * Store the notification in the database
           await this.prisma.notification.create({
