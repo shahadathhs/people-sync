@@ -10,9 +10,10 @@ WORKDIR /app
 # Install system dependencies
 RUN apt-get update && apt-get install -y openssl
 
-# Copy package, lock file & prisma folder
+# Copy package, lock file, scripts folder & prisma folder
 COPY package.json pnpm-lock.yaml ./
 COPY prisma.config.ts .
+COPY scripts ./scripts
 COPY prisma ./prisma
 
 # Install dependencies
@@ -25,6 +26,6 @@ COPY . .
 RUN pnpm build
 
 # Expose the port
-EXPOSE 5010
+EXPOSE 5015
 
 CMD ["pnpm", "start"]

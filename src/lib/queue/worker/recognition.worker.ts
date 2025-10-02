@@ -57,8 +57,13 @@ export class RecognitionWorker implements OnModuleInit {
       },
       {
         connection: {
-          host: this.config.getOrThrow(ENVEnum.REDIS_HOST),
-          port: +this.config.getOrThrow(ENVEnum.REDIS_PORT),
+          host: this.config.getOrThrow<string>(ENVEnum.REDIS_HOST),
+          port: +this.config.getOrThrow<string>(ENVEnum.REDIS_PORT),
+          username: this.config.getOrThrow<string>(ENVEnum.REDIS_USERNAME),
+          password: this.config.getOrThrow<string>(ENVEnum.REDIS_PASSWORD),
+          tls: {
+            rejectUnauthorized: false,
+          },
         },
       },
     );

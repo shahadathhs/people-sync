@@ -9,13 +9,30 @@ services:
       dockerfile: Dockerfile
     env_file:
       - .env
+    environment:
+      PORT: 5015
+      NODE_ENV: development
+
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/peoplesync_db
+
+      JWT_SECRET: asdfkamskfmasklfmaksmfaskfmaksfaopsfmpaomsfpaf
+      JWT_EXPIRES_IN: 90d
+
+      SUPER_ADMIN_EMAIL: peoplesync@gmail.com
+      SUPER_ADMIN_PASS: superadmin
+
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_USERNAME: default
+      REDIS_PASSWORD: supersecret
     ports:
-      - 5010:5010
+      - '5015:5015'
     depends_on:
       - db
       - redis
     command: >
       sh -c "
+        node ./scripts/wait-for-redis.js &&
         npx prisma migrate deploy &&
         pnpm start
       "
@@ -34,11 +51,18 @@ services:
       - '5404:5432'
 
   redis:
-    image: redis
+    image: redis:8-alpine
     container_name: peoplesync_redis
     restart: always
     ports:
       - '6384:6379'
+    environment:
+      REDIS_PASSWORD: supersecret
+    command: >
+      redis-server --requirepass ${REDIS_PASSWORD} --save "" --appendonly no
+    volumes:
+      - peoplesync_redis:/data
 
 volumes:
   peoplesync_db:
+  peoplesync_redis:

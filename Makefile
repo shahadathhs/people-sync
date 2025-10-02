@@ -25,6 +25,9 @@ build:
 up:
 	docker compose -f $(COMPOSE_FILE) up -d --build
 
+upa:
+	docker compose -f $(COMPOSE_FILE) up
+
 # Stop containers
 down:
 	docker compose -f $(COMPOSE_FILE) down
@@ -38,7 +41,7 @@ logs:
 
 # Cleanup everything
 clean: down
-	docker volume rm peoplesync_db || true
+	docker volume rm peoplesync_db peoplesync_redis || true
 	docker rmi $(APP_IMAGE) || true
 
 # Push to Docker Hub

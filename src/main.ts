@@ -49,7 +49,7 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
 
-  const port = parseInt(configService.get<string>(ENVEnum.PORT) ?? '5010', 10);
+  const port = parseInt(configService.getOrThrow<string>(ENVEnum.PORT), 10);
   await app.listen(port);
 }
 

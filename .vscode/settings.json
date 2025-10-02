@@ -30,12 +30,11 @@
   "prettier.useEditorConfig": true,
   "prettier.resolveGlobalModules": false,
   "cSpell.words": [
+    "appendonly",
     "autoincrement",
     "peoplesync",
-    "qrcode",
     "shahadathhs",
     "Supabase",
-    "TOTP",
     "WEBRTC"
   ]
 }
