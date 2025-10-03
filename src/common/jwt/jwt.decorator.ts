@@ -6,12 +6,12 @@ import {
   SetMetadata,
   UseGuards,
 } from '@nestjs/common';
-import { IS_PUBLIC_KEY } from './jwt.constants';
+import { IS_PUBLIC_KEY, ROLES_KEY } from './jwt.constants';
 import { JwtAuthGuard, RolesGuard } from './jwt.guard';
 import { JWTPayload, UserRequest } from './jwt.interface';
 
 // Roles metadata
-export const Roles = (...roles: UserEnum[]) => SetMetadata('roles', roles);
+export const Roles = (...roles: UserEnum[]) => SetMetadata(ROLES_KEY, roles);
 
 // Public decorator to skip auth guards
 export const Public = () => SetMetadata(IS_PUBLIC_KEY, true);

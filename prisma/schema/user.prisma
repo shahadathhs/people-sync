@@ -1,33 +1,38 @@
 model User {
   id String @id @default(uuid())
 
-  name     String? @default("Unnamed User")
-  email    String  @unique
+  name     String @default("Unnamed User")
+  email    String @unique
+  timezone String @default("UTC") // 'Europe/London', 'America/New_York', 'Asia/Tokyo', etc  Based on Luxon Package
   password String // hashed password 
 
-  username   String   @unique // auto-generated, updatable once
-  employeeId BigInt   @unique @default(autoincrement()) // auto-increment employee number
-  role       UserRole @default(EMPLOYEE)
+  username    String  @unique // auto-generated, updatable once
+  usernameSet Boolean @default(false)
 
-  avatarId String?
-  avatar   FileInstance? @relation(fields: [avatarId], references: [id], onDelete: SetNull)
+  employeeId BigInt @unique @default(autoincrement()) // auto-increment employee number
 
-  // HR relations
-  department   Department? @relation(fields: [departmentId], references: [id], onDelete: SetNull)
-  departmentId String?
-
-  jobTitle   JobTitle? @relation(fields: [jobTitleId], references: [id], onDelete: SetNull)
-  jobTitleId String?
+  role   UserRole @default(EMPLOYEE)
+  status Status   @default(ACTIVE)
 
   // Logout tracking
   isLoggedIn   Boolean   @default(false)
   lastLoginAt  DateTime?
   lastLogoutAt DateTime?
 
-  // Account status
-  isActive          Boolean @default(true)
-  isBanned          Boolean @default(false)
-  isUsernameUpdated Boolean @default(false)
+  avatarId String?
+  avatar   FileInstance? @relation(fields: [avatarId], references: [id], onDelete: SetNull)
+
+  companyId String?
+  company   Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+
+  branchId String?
+  branch   Branch? @relation(fields: [branchId], references: [id], onDelete: SetNull)
+
+  departmentId String?
+  department   Department? @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+
+  designationId String?
+  designation   Designation? @relation(fields: [designationId], references: [id], onDelete: SetNull)
 
   // Chats
   privateMessage                 PrivateMessage[]
@@ -45,8 +50,6 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
-  @@index([role])
-  @@index([isActive, isBanned])
   @@map("users")
 }
 
@@ -55,4 +58,27 @@ enum UserRole {
   SUPER_ADMIN // delegated by owner
   ADMIN
   EMPLOYEE
+}
+
+enum Status {
+  ACTIVE // Normal usable account
+  INACTIVE // Temporarily disabled (user deactivated or banned)
+  PENDING // Waiting for approval/verification
+  SUSPENDED // Temporarily blocked (policy violation, etc.)
+  DELETED // Soft deleted / marked for removal
+}
+
+model RefreshToken {
+  id String @id @default(uuid())
+
+  token String @unique // hashed
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@map("refresh_tokens")
 }
