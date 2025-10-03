@@ -119,7 +119,7 @@ CREATE TABLE "user_notifications" (
 CREATE TABLE "private_call" (
     "id" TEXT NOT NULL,
     "conversationId" TEXT NOT NULL,
-    "initiatorId" TEXT NOT NULL,
+    "initiatorId" TEXT,
     "type" "CallType" NOT NULL,
     "status" "CallStatus" NOT NULL DEFAULT 'INITIATED',
     "startedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -156,7 +156,7 @@ CREATE TABLE "private_conversations" (
 CREATE TABLE "private_conversation_participants" (
     "id" TEXT NOT NULL,
     "conversationId" TEXT NOT NULL,
-    "userId" TEXT,
+    "userId" TEXT NOT NULL,
     "type" "ConversationParticipantType" NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -170,7 +170,7 @@ CREATE TABLE "private_messages" (
     "type" "MessageType" NOT NULL DEFAULT 'TEXT',
     "fileId" TEXT,
     "conversationId" TEXT NOT NULL,
-    "senderId" TEXT NOT NULL,
+    "senderId" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -291,7 +291,7 @@ ALTER TABLE "user_notifications" ADD CONSTRAINT "user_notifications_notification
 ALTER TABLE "private_call" ADD CONSTRAINT "private_call_conversationId_fkey" FOREIGN KEY ("conversationId") REFERENCES "private_conversations"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "private_call" ADD CONSTRAINT "private_call_initiatorId_fkey" FOREIGN KEY ("initiatorId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "private_call" ADD CONSTRAINT "private_call_initiatorId_fkey" FOREIGN KEY ("initiatorId") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "private_call_participant" ADD CONSTRAINT "private_call_participant_callId_fkey" FOREIGN KEY ("callId") REFERENCES "private_call"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -315,7 +315,7 @@ ALTER TABLE "private_messages" ADD CONSTRAINT "private_messages_fileId_fkey" FOR
 ALTER TABLE "private_messages" ADD CONSTRAINT "private_messages_conversationId_fkey" FOREIGN KEY ("conversationId") REFERENCES "private_conversations"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "private_messages" ADD CONSTRAINT "private_messages_senderId_fkey" FOREIGN KEY ("senderId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "private_messages" ADD CONSTRAINT "private_messages_senderId_fkey" FOREIGN KEY ("senderId") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "private_message_statuses" ADD CONSTRAINT "private_message_statuses_messageId_fkey" FOREIGN KEY ("messageId") REFERENCES "private_messages"("id") ON DELETE CASCADE ON UPDATE CASCADE;

@@ -4,8 +4,8 @@ model PrivateCall {
   conversationId String
   conversation   PrivateConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 
-  initiatorId String
-  initiator   User   @relation(fields: [initiatorId], references: [id], onDelete: Cascade)
+  initiatorId String?
+  initiator   User?   @relation(fields: [initiatorId], references: [id], onDelete: SetNull)
 
   type   CallType
   status CallStatus @default(INITIATED)
