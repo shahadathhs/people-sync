@@ -22,8 +22,8 @@ model PrivateConversationParticipant {
   conversationId String
   conversation   PrivateConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 
-  userId String?
-  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   type ConversationParticipantType
 
