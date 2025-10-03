@@ -116,7 +116,7 @@ CREATE TABLE "user_notifications" (
 );
 
 -- CreateTable
-CREATE TABLE "PrivateCall" (
+CREATE TABLE "private_call" (
     "id" TEXT NOT NULL,
     "conversationId" TEXT NOT NULL,
     "initiatorId" TEXT NOT NULL,
@@ -126,11 +126,11 @@ CREATE TABLE "PrivateCall" (
     "endedAt" TIMESTAMP(3),
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT "PrivateCall_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "private_call_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "PrivateCallParticipant" (
+CREATE TABLE "private_call_participant" (
     "id" TEXT NOT NULL,
     "callId" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
@@ -138,7 +138,7 @@ CREATE TABLE "PrivateCallParticipant" (
     "joinedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "leftAt" TIMESTAMP(3),
 
-    CONSTRAINT "PrivateCallParticipant_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "private_call_participant_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -205,9 +205,6 @@ CREATE TABLE "users" (
     "lastLoginAt" TIMESTAMP(3),
     "lastLogoutAt" TIMESTAMP(3),
     "avatarId" TEXT,
-    "companyId" TEXT,
-    "branchId" TEXT,
-    "departmentId" TEXT,
     "designationId" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -267,6 +264,12 @@ CREATE UNIQUE INDEX "users_username_key" ON "users"("username");
 CREATE UNIQUE INDEX "users_employeeId_key" ON "users"("employeeId");
 
 -- CreateIndex
+CREATE INDEX "users_role_idx" ON "users"("role");
+
+-- CreateIndex
+CREATE INDEX "users_status_idx" ON "users"("status");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "refresh_tokens_token_key" ON "refresh_tokens"("token");
 
 -- AddForeignKey
@@ -285,16 +288,16 @@ ALTER TABLE "user_notifications" ADD CONSTRAINT "user_notifications_userId_fkey"
 ALTER TABLE "user_notifications" ADD CONSTRAINT "user_notifications_notificationId_fkey" FOREIGN KEY ("notificationId") REFERENCES "notifications"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "PrivateCall" ADD CONSTRAINT "PrivateCall_conversationId_fkey" FOREIGN KEY ("conversationId") REFERENCES "private_conversations"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "private_call" ADD CONSTRAINT "private_call_conversationId_fkey" FOREIGN KEY ("conversationId") REFERENCES "private_conversations"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "PrivateCall" ADD CONSTRAINT "PrivateCall_initiatorId_fkey" FOREIGN KEY ("initiatorId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "private_call" ADD CONSTRAINT "private_call_initiatorId_fkey" FOREIGN KEY ("initiatorId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "PrivateCallParticipant" ADD CONSTRAINT "PrivateCallParticipant_callId_fkey" FOREIGN KEY ("callId") REFERENCES "PrivateCall"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "private_call_participant" ADD CONSTRAINT "private_call_participant_callId_fkey" FOREIGN KEY ("callId") REFERENCES "private_call"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "PrivateCallParticipant" ADD CONSTRAINT "PrivateCallParticipant_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "private_call_participant" ADD CONSTRAINT "private_call_participant_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "private_conversations" ADD CONSTRAINT "private_conversations_lastMessageId_fkey" FOREIGN KEY ("lastMessageId") REFERENCES "private_messages"("id") ON DELETE SET NULL ON UPDATE CASCADE;
@@ -322,15 +325,6 @@ ALTER TABLE "private_message_statuses" ADD CONSTRAINT "private_message_statuses_
 
 -- AddForeignKey
 ALTER TABLE "users" ADD CONSTRAINT "users_avatarId_fkey" FOREIGN KEY ("avatarId") REFERENCES "file_instances"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "users" ADD CONSTRAINT "users_companyId_fkey" FOREIGN KEY ("companyId") REFERENCES "companies"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "users" ADD CONSTRAINT "users_branchId_fkey" FOREIGN KEY ("branchId") REFERENCES "branches"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "users" ADD CONSTRAINT "users_departmentId_fkey" FOREIGN KEY ("departmentId") REFERENCES "departments"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "users" ADD CONSTRAINT "users_designationId_fkey" FOREIGN KEY ("designationId") REFERENCES "designations"("id") ON DELETE SET NULL ON UPDATE CASCADE;
