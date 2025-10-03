@@ -16,6 +16,8 @@ model PrivateCall {
   participants PrivateCallParticipant[]
 
   createdAt DateTime @default(now())
+
+  @@map("private_call")
 }
 
 model PrivateCallParticipant {
@@ -31,6 +33,8 @@ model PrivateCallParticipant {
 
   joinedAt DateTime  @default(now())
   leftAt   DateTime?
+
+  @@map("private_call_participant")
 }
 
 enum CallType {

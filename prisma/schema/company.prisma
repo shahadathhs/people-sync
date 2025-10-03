@@ -6,7 +6,6 @@ model Company {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
-  User      User[]
 
   @@map("companies")
 }
@@ -19,7 +18,6 @@ model Branch {
   companyId String
 
   departments Department[]
-  managers    User[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -36,7 +34,6 @@ model Department {
   branchId String
 
   designations Designation[]
-  employees    User[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -52,7 +49,7 @@ model Designation {
   department   Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
   departmentId String
 
-  employees User[]
+  users User[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt

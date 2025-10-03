@@ -22,15 +22,6 @@ model User {
   avatarId String?
   avatar   FileInstance? @relation(fields: [avatarId], references: [id], onDelete: SetNull)
 
-  companyId String?
-  company   Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
-
-  branchId String?
-  branch   Branch? @relation(fields: [branchId], references: [id], onDelete: SetNull)
-
-  departmentId String?
-  department   Department? @relation(fields: [departmentId], references: [id], onDelete: SetNull)
-
   designationId String?
   designation   Designation? @relation(fields: [designationId], references: [id], onDelete: SetNull)
 
@@ -50,6 +41,8 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
+  @@index([role])
+  @@index([status])
   @@map("users")
 }
 
