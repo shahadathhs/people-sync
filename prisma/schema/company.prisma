@@ -2,7 +2,9 @@ model Company {
   id   String @id @default(uuid())
   name String @unique
 
-  branches Branch[]
+  branches     Branch[]
+  recognitions Recognition[]
+  badges       Badge[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt

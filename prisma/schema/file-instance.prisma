@@ -15,6 +15,7 @@ model FileInstance {
   // Relations
   privateMessage PrivateMessage[]
   user           User[]
+  badge          Badge[]
 
   @@unique([bucket, path])
   @@map("file_instances")
