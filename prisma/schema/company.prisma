@@ -2,6 +2,7 @@ model Company {
   id   String @id @default(uuid())
   name String @unique
 
+  users        User[]
   branches     Branch[]
   recognitions Recognition[]
   badges       Badge[]
