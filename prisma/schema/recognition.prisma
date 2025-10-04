@@ -1,0 +1,109 @@
+// ========================
+// RECOGNITION SYSTEM
+// ========================
+model Badge {
+  id String @id @default(uuid())
+
+  title    String
+  category BadgeCategory
+
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  companyId String
+
+  iconImageId String?
+  iconImage   FileInstance? @relation(fields: [iconImageId], references: [id], onDelete: SetNull)
+
+  recognitions Recognition[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@map("badges")
+}
+
+enum BadgeCategory {
+  MILESTONE
+  GOOD_JOB
+  ANNIVERSARY
+  PROMOTION
+  ACHIEVEMENT
+  AWARD
+  RECOGNITION
+}
+
+model Recognition {
+  id String @id @default(uuid())
+
+  message     String
+  description String
+
+  shouldNotify Boolean @default(true)
+
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  companyId String
+
+  badgeId String
+  badge   Badge  @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+
+  // Relations
+  recognitionUsers RecognitionUser[]
+  comments         RecognitionComment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@map("recognitions")
+}
+
+// ------------------------
+// RecognitionUser Join Table
+// ------------------------
+model RecognitionUser {
+  id String @id @default(uuid())
+
+  recognitionId String
+  recognition   Recognition @relation(fields: [recognitionId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@unique([recognitionId, userId])
+  @@map("recognition_users")
+}
+
+// ------------------------
+// Comments & Reactions
+// ------------------------
+model RecognitionComment {
+  id String @id @default(uuid())
+
+  comment  String?
+  reaction Reaction?
+
+  recognitionId String
+  recognition   Recognition @relation(fields: [recognitionId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  parentCommentId String?
+  parentComment   RecognitionComment?  @relation("CommentReplies", fields: [parentCommentId], references: [id], onDelete: Cascade)
+  replies         RecognitionComment[] @relation("CommentReplies")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@map("recognition_comments")
+}
+
+enum Reaction {
+  LIKE
+  LOVE_FACE
+  SMILE_FACE
+  WOW_FACE
+  SAD_FACE
+  CELEBRATION
+}

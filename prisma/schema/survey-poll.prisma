@@ -1,0 +1,165 @@
+// ========================
+// SURVEY SYSTEM
+// ========================
+
+model Survey {
+  id String @id @default(uuid())
+
+  title       String
+  description String?
+
+  questions   Question[]
+  assignments Assignment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@map("surveys")
+}
+
+model Question {
+  id String @id @default(uuid())
+
+  text String
+  type QuestionType
+
+  survey   Survey @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  surveyId String
+
+  options   Option[] // for MULTI_CHOICE questions
+  responses SurveyResponse[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@map("questions")
+}
+
+enum QuestionType {
+  OPEN_ENDED
+  MULTI_CHOICE
+  RATING
+}
+
+model Option {
+  id   String @id @default(uuid())
+  text String
+
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  questionId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@map("options")
+}
+
+model SurveyResponse {
+  id String @id @default(uuid())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  questionId String
+
+  answer String // text, optionId, JSON, or rating value
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@unique([userId, questionId])
+  @@map("survey_responses")
+}
+
+// ========================
+// POLL SYSTEM
+// ========================
+
+model Poll {
+  id       String @id @default(uuid())
+  question String
+
+  options     PollOption[]
+  responses   PollResponse[]
+  assignments Assignment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@map("polls")
+}
+
+model PollOption {
+  id   String @id @default(uuid())
+  text String
+
+  poll   Poll   @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  pollId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@map("poll_options")
+}
+
+model PollResponse {
+  id String @id @default(uuid())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+
+  poll   Poll   @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  pollId String
+
+  answer String // text, optionId, JSON, or rating value
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@unique([userId, pollId])
+  @@map("poll_responses")
+}
+
+// ========================
+// ASSIGNMENTS
+// ========================
+
+model Assignment {
+  id   String         @id @default(uuid())
+  type AssignmentType
+
+  surveyId String?
+  survey   Survey? @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+
+  pollId String?
+  poll   Poll?   @relation(fields: [pollId], references: [id], onDelete: Cascade)
+
+  targets AssignmentTarget[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@map("assignments")
+}
+
+model AssignmentTarget {
+  id String @id @default(uuid())
+
+  assignment   Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  assignmentId String
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@unique([assignmentId, userId])
+  @@map("assignment_targets")
+}
+
+enum AssignmentType {
+  SURVEY
+  POLL
+}
