@@ -1,5 +1,5 @@
-import { AppError } from '@/common/error/handle-error.app';
 import { Injectable } from '@nestjs/common';
+import { User } from '@prisma/client';
 import { plainToInstance } from 'class-transformer';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -16,14 +16,14 @@ export class UtilsService {
   }
 
   async getEmailById(id: string): Promise<string> {
-    const user = await this.prisma.user.findUnique({ where: { id } });
-    if (!user) throw new AppError(404, 'User not found');
+    const user = await this.prisma.user.findUniqueOrThrow({ where: { id } });
+
     return user.email;
   }
 
-  async getUserByEmail(email: string) {
-    const user = await this.prisma.user.findUnique({ where: { email } });
-    if (!user) throw new AppError(404, 'User not found');
+  async getUserByEmail(email: string): Promise<User> {
+    const user = await this.prisma.user.findUniqueOrThrow({ where: { email } });
+
     return user;
   }
 }
