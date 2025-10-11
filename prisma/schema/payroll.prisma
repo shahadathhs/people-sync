@@ -4,9 +4,10 @@ model Payroll {
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  dailyWorkHour Int       @default(8) // More than that goes to overtime
-  breakTime     BreakTime @default(NONE)
-  offDays       OffDay[]  @default([SATURDAY, SUNDAY])
+  dailyWorkHour      Int @default(8) // More than that goes to overtime
+  breakTimeInMinutes Int @default(0)
+
+  offDays OffDay[] @default([SATURDAY, SUNDAY])
 
   currency Currency @default(USD)
 
@@ -31,13 +32,6 @@ enum PayInterval {
   WEEKLY
   BIWEEKLY
   MONTHLY
-}
-
-enum BreakTime {
-  NONE
-  FIFTEEN_MINUTES
-  THIRTY_MINUTES
-  ONE_HOUR
 }
 
 enum OffDay {
