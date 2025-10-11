@@ -1,0 +1,55 @@
+model Payroll {
+  id String @id @default(uuid())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  dailyWorkHour      Int @default(8) // More than that goes to overtime
+  breakTimeInMinutes Int @default(0)
+
+  offDays OffDay[] @default([SATURDAY, SUNDAY])
+
+  currency Currency @default(USD)
+
+  payRate     Float       @default(0.0)
+  payRateType PayInterval @default(MONTHLY)
+
+  overTimePayRate     Float       @default(0.0)
+  overTimePayRateType PayInterval @default(MONTHLY)
+
+  paymentPeriod PayInterval @default(MONTHLY)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@unique([userId])
+  @@map("payrolls")
+}
+
+enum PayInterval {
+  HOURLY
+  DAILY
+  WEEKLY
+  BIWEEKLY
+  MONTHLY
+}
+
+enum OffDay {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
+enum Currency {
+  USD // United States
+  AUD // Australia
+  JPY // Japan
+  CAD // Canada
+  BDT // Bangladesh
+  GBP // United Kingdom
+  EUR // Europe
+}

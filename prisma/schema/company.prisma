@@ -20,6 +20,13 @@ model Branch {
   company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
   companyId String
 
+  // Location Settings
+  latitude     Float
+  longitude    Float
+  address      String // resolved address from Nominatim
+  radiusMeters Int    @default(100) // allowed check-in distance (meters)
+  timezone     String @default("UTC") // local timezone of the branch
+
   departments Department[]
 
   createdAt DateTime @default(now())

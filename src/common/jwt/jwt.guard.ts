@@ -26,9 +26,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       context.getHandler(),
       context.getClass(),
     ]);
-    if (isPublic) {
-      return true;
-    }
+    if (isPublic) return true;
 
     // Otherwise use default passport-jwt flow
     const activate = (await super.canActivate(context)) as boolean;
@@ -36,9 +34,9 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   }
 
   // Ensure we return a meaningful error if no user
-  handleRequest(err: any, user: any, info: any) {
-    this.logger.error(err, info);
+  handleRequest(err: any, user: any) {
     if (err) {
+      this.logger.error('Error In JWT', err);
       throw err;
     }
     if (!user) {

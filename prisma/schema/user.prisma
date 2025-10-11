@@ -50,6 +50,9 @@ model User {
   recognitionUsers    RecognitionUser[]
   recognitionComments RecognitionComment[]
 
+  // Payroll
+  payroll Payroll? // auto create with default value when employee created
+
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
